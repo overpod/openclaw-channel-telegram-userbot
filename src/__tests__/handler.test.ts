@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test"
+import { detectMarkdown } from "../handler.js"
 
 // Test media description formatting (mirrors logic in index.ts)
 function buildMediaDescription(media: {
@@ -76,5 +77,43 @@ describe("inbound text building", () => {
 
 	test("voice message with duration, no text", () => {
 		expect(buildInboundText("", undefined, { type: "voice", duration: 8 })).toBe("[voice, 8s]")
+	})
+})
+
+describe("detectMarkdown", () => {
+	test("plain text — no markdown", () => {
+		expect(detectMarkdown("hello world")).toBeUndefined()
+	})
+
+	test("text with special chars but no formatting", () => {
+		expect(detectMarkdown("price is $10 (20% off)")).toBeUndefined()
+	})
+
+	test("single asterisk — not formatting", () => {
+		expect(detectMarkdown("5 * 3 = 15")).toBeUndefined()
+	})
+
+	test("bold *text*", () => {
+		expect(detectMarkdown("this is *bold*")).toBe("md2")
+	})
+
+	test("italic _text_", () => {
+		expect(detectMarkdown("this is _italic_")).toBe("md2")
+	})
+
+	test("code `block`", () => {
+		expect(detectMarkdown("run `npm install`")).toBe("md2")
+	})
+
+	test("strikethrough ~text~", () => {
+		expect(detectMarkdown("this is ~wrong~")).toBe("md2")
+	})
+
+	test("spoiler ||text||", () => {
+		expect(detectMarkdown("the answer is ||42||")).toBe("md2")
+	})
+
+	test("mixed formatting", () => {
+		expect(detectMarkdown("*bold* and `code`")).toBe("md2")
 	})
 })

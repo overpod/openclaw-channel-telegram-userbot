@@ -172,11 +172,20 @@ function extractMedia(message: Api.Message): MediaAttachment | undefined {
 	return undefined
 }
 
-/** Parse Markdown-style formatting to Telegram entities */
-function parseMarkdown(text: string): { text: string; parseMode: "md2" | undefined } {
-	// Check if text contains any markdown markers
-	const hasMarkdown = /[*_`~|[\]()]/.test(text)
-	return { text, parseMode: hasMarkdown ? "md2" : undefined }
+/**
+ * Detect intentional Markdown formatting and enable MarkdownV2 parse mode.
+ * Only activates when paired markers are found (e.g. *bold*, _italic_, `code`).
+ * Returns parseMode "md2" only when formatting is detected, to avoid
+ * MarkdownV2 parsing errors on plain text with special characters.
+ */
+export function detectMarkdown(text: string): "md2" | undefined {
+	// Match paired formatting markers only
+	const hasBold = /\*[^*]+\*/.test(text)
+	const hasItalic = /_[^_]+_/.test(text)
+	const hasCode = /`[^`]+`/.test(text)
+	const hasStrike = /~[^~]+~/.test(text)
+	const hasSpoiler = /\|\|[^|]+\|\|/.test(text)
+	return hasBold || hasItalic || hasCode || hasStrike || hasSpoiler ? "md2" : undefined
 }
 
 export async function sendTextReply(
@@ -199,10 +208,10 @@ export async function sendTextReply(
 		await sleep(config.replyDelaySec * 1000)
 	}
 
-	const { text: parsedText, parseMode } = parseMarkdown(text)
+	const parseMode = detectMarkdown(text)
 
 	await client.sendMessage(chatId, {
-		message: parsedText,
+		message: text,
 		parseMode,
 		replyTo: replyToMessageId,
 	})
@@ -229,17 +238,21 @@ export async function sendMediaReply(
 		await sleep(config.replyDelaySec * 1000)
 	}
 
-	const parsed = caption ? parseMarkdown(caption) : undefined
+	const parseMode = caption ? detectMarkdown(caption) : undefined
 
 	await client.sendFile(chatId, {
 		file: filePath,
-		caption: parsed?.text,
-		parseMode: parsed?.parseMode,
+		caption,
+		parseMode,
 		replyTo: replyToMessageId,
 	})
 }
 
-/** Download media from a message to a local path */
+/**
+ * Download media from a message to a local path.
+ * Returns the actual output path on success, or undefined on failure.
+ * The returned path may differ from outputPath if the library appends an extension.
+ */
 export async function downloadMedia(
 	client: TelegramClient,
 	chatId: string,
@@ -252,7 +265,9 @@ export async function downloadMedia(
 		if (!msg?.media) return undefined
 
 		const result = await client.downloadMedia(msg, { outputFile: outputPath })
-		return result ? outputPath : undefined
+		if (!result) return undefined
+		// GramJS may return a Buffer or the path string
+		return typeof result === "string" ? result : outputPath
 	} catch {
 		return undefined
 	}
