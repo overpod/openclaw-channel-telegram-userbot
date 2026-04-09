@@ -5,7 +5,10 @@ OpenClaw channel plugin that connects your **personal Telegram account** (not a 
 ## Features
 
 - **MTProto via GramJS** — full Telegram user API, not the limited Bot API
-- **DM and group chat support** — with configurable mention requirements for groups
+- **Media support** — photos, videos, documents, voice, stickers, animations (inbound & outbound)
+- **Reply context** — AI sees the quoted message when someone replies
+- **Markdown formatting** — bold, italic, code, strikethrough, spoilers in AI responses
+- **DM and group chat support** — with configurable mention requirements
 - **Machine-bound session encryption** — AES-256-GCM, sessions are useless on another device
 - **Human-like reply delay** — configurable pause + typing indicator before responding
 - **Chat allowlist / denylist** — control which chats the assistant can access
