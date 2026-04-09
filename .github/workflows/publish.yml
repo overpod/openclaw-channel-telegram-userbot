@@ -40,6 +40,8 @@ jobs:
         with:
           node-version: 22
           registry-url: https://npm.pkg.github.com
+          scope: "@overpod"
+      - run: npm pkg set name="@overpod/openclaw-channel-telegram-userbot"
       - run: npm install
       - run: npm publish --access public || echo "Already published, skipping"
         env:
