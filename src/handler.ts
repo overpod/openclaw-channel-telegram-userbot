@@ -49,10 +49,10 @@ export function setupInboundHandler(
 		const message = event.message as Api.Message | undefined
 		if (!message) return
 
-		// Must have text or media
+		// Must have text or supported media
 		const hasText = !!message.message
-		const hasMedia = !!message.media
-		if (!hasText && !hasMedia) return
+		const media = extractMedia(message)
+		if (!hasText && !media) return
 
 		// Skip our own messages
 		const senderId = message.senderId?.toString()
@@ -85,9 +85,6 @@ export function setupInboundHandler(
 				senderName = entity.title || "Unknown"
 			}
 		} catch {}
-
-		// Extract media attachment
-		const media = extractMedia(message)
 
 		// Get reply context (quoted message text)
 		let replyContext: string | undefined
