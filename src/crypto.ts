@@ -1,4 +1,6 @@
-import { machineIdSync } from "node-machine-id"
+import machineId from "node-machine-id"
+
+const { machineIdSync } = machineId
 
 function getEncryptionSecret(): string {
 	const envKey = process.env.OPENCLAW_TELEGRAM_SESSION_KEY
