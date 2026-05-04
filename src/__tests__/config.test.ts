@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { getGroupConfig, isChatAllowed, resolveConfig } from "../config.js"
+import { getGroupConfig, isChatAllowed, resolveChatSystemPrompt, resolveConfig } from "../config.js"
 
 describe("config", () => {
 	const baseConfig = resolveConfig({
@@ -61,5 +61,62 @@ describe("config", () => {
 			groups: { "*": { requireMention: true } },
 		})
 		expect(getGroupConfig(config, "anything")).toEqual({ requireMention: true })
+	})
+
+	it("should merge wildcard and specific group config", () => {
+		const config = resolveConfig({
+			...baseConfig,
+			groups: {
+				"*": { requireMention: true, enabled: true, systemPrompt: "Global group prompt" },
+				"123": { enabled: false },
+			},
+		})
+		expect(getGroupConfig(config, "123")).toEqual({
+			requireMention: true,
+			enabled: false,
+			systemPrompt: "Global group prompt",
+		})
+	})
+
+	it("should resolve default chat system prompt", () => {
+		const config = resolveConfig({
+			...baseConfig,
+			conversations: { defaultSystemPrompt: "You are helpful" },
+		})
+		expect(resolveChatSystemPrompt(config, "123", false)).toBe("You are helpful")
+	})
+
+	it("should prefer per-chat prompt over default", () => {
+		const config = resolveConfig({
+			...baseConfig,
+			conversations: {
+				defaultSystemPrompt: "You are helpful",
+				systemPrompts: { "123": "You are terse" },
+			},
+		})
+		expect(resolveChatSystemPrompt(config, "123", false)).toBe("You are terse")
+	})
+
+	it("should append group prompt to conversation prompt for groups", () => {
+		const config = resolveConfig({
+			...baseConfig,
+			conversations: { defaultSystemPrompt: "You are helpful" },
+			groups: { "123": { systemPrompt: "Reply like a regular member." } },
+		})
+		expect(resolveChatSystemPrompt(config, "123", true)).toBe(
+			"You are helpful\n\nReply like a regular member.",
+		)
+	})
+
+	it("should ignore blank prompts", () => {
+		const config = resolveConfig({
+			...baseConfig,
+			conversations: {
+				defaultSystemPrompt: "   ",
+				systemPrompts: { "123": "\n\t" },
+			},
+			groups: { "123": { systemPrompt: "  " } },
+		})
+		expect(resolveChatSystemPrompt(config, "123", true)).toBeUndefined()
 	})
 })

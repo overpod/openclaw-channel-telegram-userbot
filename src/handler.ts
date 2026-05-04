@@ -191,7 +191,7 @@ export async function sendTextReply(
 	chatId: string,
 	text: string,
 	replyToMessageId?: number,
-): Promise<void> {
+): Promise<Api.Message> {
 	// Human-like delay
 	if (config.replyDelaySec > 0) {
 		try {
@@ -207,21 +207,21 @@ export async function sendTextReply(
 
 	const parseMode = detectMarkdown(text)
 
-	await client.sendMessage(chatId, {
+	return (await client.sendMessage(chatId, {
 		message: text,
 		parseMode,
 		replyTo: replyToMessageId,
-	})
+	})) as Api.Message
 }
 
 export async function sendMediaReply(
 	client: TelegramClient,
 	config: PluginConfig,
 	chatId: string,
-	filePath: string,
+	file: string | Buffer,
 	caption?: string,
 	replyToMessageId?: number,
-): Promise<void> {
+): Promise<Api.Message> {
 	// Human-like delay
 	if (config.replyDelaySec > 0) {
 		try {
@@ -237,12 +237,12 @@ export async function sendMediaReply(
 
 	const parseMode = caption ? detectMarkdown(caption) : undefined
 
-	await client.sendFile(chatId, {
-		file: filePath,
+	return (await client.sendFile(chatId, {
+		file,
 		caption,
 		parseMode,
 		replyTo: replyToMessageId,
-	})
+	})) as Api.Message
 }
 
 /**

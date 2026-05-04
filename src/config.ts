@@ -1,6 +1,7 @@
 export interface GroupConfig {
 	requireMention?: boolean
 	enabled?: boolean
+	systemPrompt?: string
 }
 
 export interface ConversationsConfig {
@@ -48,5 +49,27 @@ export function isChatAllowed(config: PluginConfig, chatId: string): boolean {
 }
 
 export function getGroupConfig(config: PluginConfig, chatId: string): GroupConfig {
-	return config.groups[chatId] || config.groups["*"] || {}
+	const wildcard = config.groups["*"] || {}
+	const specific = config.groups[chatId] || {}
+	return { ...wildcard, ...specific }
+}
+
+function normalizePrompt(value: string | undefined): string | undefined {
+	if (typeof value !== "string") return undefined
+	const trimmed = value.trim()
+	return trimmed.length > 0 ? trimmed : undefined
+}
+
+export function resolveChatSystemPrompt(
+	config: PluginConfig,
+	chatId: string,
+	isGroup: boolean,
+): string | undefined {
+	const conversationPrompt =
+		normalizePrompt(config.conversations.systemPrompts?.[chatId]) ||
+		normalizePrompt(config.conversations.defaultSystemPrompt)
+	const groupPrompt = isGroup
+		? normalizePrompt(getGroupConfig(config, chatId).systemPrompt)
+		: undefined
+	return [conversationPrompt, groupPrompt].filter(Boolean).join("\n\n") || undefined
 }

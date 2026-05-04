@@ -1,20 +1,106 @@
 {
   "id": "telegram-userbot",
   "name": "Telegram Userbot",
-  "version": "0.1.0",
-  "type": "channel",
-  "description": "Connect your personal Telegram account to OpenClaw via MTProto. Your AI assistant responds as you.",
-  "author": "overpod",
-  "license": "MIT",
-  "repository": "https://github.com/overpod/openclaw-channel-telegram-userbot",
-  "entry": "src/index.ts",
-  "config": {
-    "apiId": { "type": "number", "required": true, "description": "Telegram API ID from my.telegram.org" },
-    "apiHash": { "type": "string", "required": true, "description": "Telegram API Hash from my.telegram.org" },
-    "sessionString": { "type": "string", "required": true, "secret": true, "description": "GramJS session string (run: bun run src/auth.ts)" },
-    "allowFrom": { "type": "array", "default": ["*"], "description": "Allowed chat IDs (* = all)" },
-    "denyFrom": { "type": "array", "default": [], "description": "Denied chat IDs (takes priority over allowFrom)" },
-    "replyDelaySec": { "type": "number", "default": 2, "description": "Delay before reply in seconds" },
-    "groups": { "type": "object", "default": {}, "description": "Per-group settings: { groupId: { requireMention: bool, enabled: bool } }" }
+  "version": "0.4.0",
+  "description": "Connect your personal Telegram account to OpenClaw via MTProto.",
+  "channels": [
+    "telegram-userbot"
+  ],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": true,
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "apiId": {
+        "type": "number"
+      },
+      "apiHash": {
+        "type": "string"
+      },
+      "sessionString": {
+        "type": "string"
+      },
+      "allowFrom": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "denyFrom": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "replyDelaySec": {
+        "type": "number"
+      },
+      "groups": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "conversations": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "accounts": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  },
+  "channelConfigs": {
+    "telegram-userbot": {
+      "label": "Telegram Userbot",
+      "description": "Connect your personal Telegram account to OpenClaw via MTProto.",
+      "schema": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "apiId": {
+            "type": "number"
+          },
+          "apiHash": {
+            "type": "string"
+          },
+          "sessionString": {
+            "type": "string"
+          },
+          "allowFrom": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "denyFrom": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "replyDelaySec": {
+            "type": "number"
+          },
+          "groups": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "conversations": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "accounts": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    }
   }
 }

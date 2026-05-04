@@ -1,24 +1,35 @@
 {
   "name": "openclaw-channel-telegram-userbot",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "OpenClaw channel plugin — Telegram userbot via MTProto (GramJS)",
   "type": "module",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "auth": "bun run src/auth.ts",
-    "dev": "bun run src/index.ts",
+    "auth": "npm run build && node dist/auth.js",
+    "build": "tsc -p tsconfig.json",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
+    "prepack": "npm run build",
     "typecheck": "tsc --noEmit",
     "test": "bun test"
   },
-  "keywords": ["openclaw", "telegram", "userbot", "mtproto", "gramjs", "channel", "plugin"],
+  "keywords": [
+    "openclaw",
+    "telegram",
+    "userbot",
+    "mtproto",
+    "gramjs",
+    "channel",
+    "plugin"
+  ],
   "license": "MIT",
   "files": [
-    "src",
+    "dist",
     "openclaw.plugin.json",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "repository": {
     "type": "git",
@@ -26,8 +37,28 @@
   },
   "author": "overpod",
   "openclaw": {
-    "type": "channel",
-    "id": "telegram-userbot"
+    "extensions": [
+      "./dist/index.js"
+    ],
+    "channel": {
+      "id": "telegram-userbot",
+      "label": "Telegram Userbot",
+      "selectionLabel": "Telegram Userbot (MTProto)",
+      "detailLabel": "Telegram Userbot",
+      "docsPath": "/channels/telegram-userbot",
+      "docsLabel": "telegram-userbot",
+      "blurb": "Connect a personal Telegram account through MTProto instead of the Bot API.",
+      "markdownCapable": true,
+      "exposure": {
+        "configured": true,
+        "setup": false,
+        "docs": false
+      },
+      "showInSetup": false
+    },
+    "install": {
+      "minHostVersion": ">=2026.4.14"
+    }
   },
   "dependencies": {
     "node-machine-id": "^1.1.12",
@@ -36,6 +67,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.10",
     "bun-types": "^1.3.11",
+    "openclaw": "^2026.4.14",
     "typescript": "^6.0.2"
   }
 }
